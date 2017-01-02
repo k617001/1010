@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <meta charset="utf-8">
+  <title>1010</title>
+  
+  <style>
+	body {
+		margin: 0px;   /*緊貼頂部(上下左右)，沒有空隙*/
+	}  
+	
+	#wrapper {
+        width: 900px;   /*寬度設定為900px*/
+        margin: auto;   /*版面居中對齊*/
+		font-family: "微軟正黑體",Arial, Helvetica, sans-serif;
+		border: 1px solid #dddddd; /*網頁做外框的設定*/
+    }
+	#header {
+        height: 20px; /*高度設定為130px，因有有設背景圖片，所以要設高度*/
+        margin: auto;   /*版面居中對齊*/
+		border: 1px solid #dddddd; /*網頁做外框的設定*/
+		text-align:center;
+    }
+
+	#content {
+        /* CSS 中 DIV 自己會長到上層 DIV100% 的寬度 (在這裡就是 #wrapper)，所以可不用設定寬度*/
+		border: 1px solid #dddddd; /*網頁做外框的設定*/
+		margin: auto;   /*版面居中對齊*/
+		pandding: 30px;
+		border-radius: 20px;
+    }
+
+	#ground {
+		margin: auto;   /*版面居中對齊*/
+		border-radius: 20px;
+    }
+
+	#footer {
+		height: 250px;
+		border: 1px solid #dddddd; /*網頁做外框的設定*/
+		border-radius: 20px;
+    }
+	
+	.section {
+		height: 150px;
+		width:150px;
+		float:left;
+		border: 1px solid #bbbbbb; /*網頁做外框的設定*/
+		border-radius: 20px;
+		text-align:center; 
+		vertical-align:middle;
+	}
+	
+	td{
+		border-radius: 3px;
+		width: 25px;
+		height: 25px;
+	}
+	
+	.bg_defult {
+		background-color:#EEEEEE;
+	}
+	
+	.bg_red {
+		background-color:red;
+	}
+	.bg_red2 {
+		background-color:#CC3333;
+	}
+	.bg_red3 {
+		background-color:#FF6600;
+	}
+	.bg_org {
+		background-color:#FFCC33;
+	}
+	
+	
+	
+	.bg_green {
+		background-color:#00FF99;
+	}
+	.bg_green2 {
+		background-color:#00C899;
+	}
+	
+	
+	.bg_blue {
+		background-color:#00CCFF;
+	}
+	.bg_blue2 {
+		background-color:#6666FF;
+	}
+	
+	
+	.mouseIn {
+        background-color:#FFD567; /*網頁做外框的設定*/
+    }
+	.mouseShow {
+        background-color:#CCCCCC; /*網頁做外框的設定*/
+    }
+  </style>
+</head>
+<body>
+  <div id="game1010"></div>
+</body>
+</html>
+
+<script>
+
+
+(function($){
+  $.fn.game1010 = function(option) {
+    
+    var $this = $(this),
+        view = new View(),
+        groundBox = new GroundBox(),
+		groundMap = [],
+		isDraggable = false,
+		selBox = null;
+    
+	
+	
+    init();
+	view.init();
+    controller();
+    
+	///初始值
+    function init() {
+      var initOption = {
+        width: 10,
+        height: 10
+      };
+      isDraggable = new Array
+      option = $.extend(initOption, option);
+      
+    }
+    
+	var boxObjHandle = false;
+	//觸發事件
+    function controller() {
+		var $area = $('.bg_defult'),
+			sectionAry = ['section1','section2','section3'];
+		
+		//設定選擇的物件事件
+		setSectionEvent();	
+    }
+	
+	function setSectionEvent() {
+		var sectionAry = ['section1','section2','section3'];
+		
+		//
+		for(var row = 0; row < option.height; row++) {
+			for(var column = 0; column < option.height; column++) {
+				//滑鼠滑過的事件
+				var groud = groundMap[row + ',' + column].gound;
+				groud.droppable({
+					tolerance: "pointer",
+					over: function (event, ui) {
+						if(!boxObjHandle) {
+							return;
+						}
+						groundBox.setNowGroundBoxInfo($(this));
+					},
+					out: function (event, ui) {
+						groundBox.setNowGroundBoxInfo(null);
+					}
+				});			
+			}
+		}
+		
+		//設定選擇的物件事件
+		for(var i = 0; i < sectionAry.length; i++) {
+			var $sectionTable = $('#'+sectionAry[i]+' table');
+			
+			$sectionTable.draggable({ 
+				revert: true,
+				revertDuration: 1,
+				cursorAt: { top: 10, left: 10 },
+				offset :{top: 300, left: 10 },
+				//選擇物件開始事件
+				start: function() {
+					boxObjHandle = true;//已選擇seltion flag
+				},
+				//放開事件
+				stop: function() {
+					boxObjHandle = false;//未選擇seltion flag
+					//設定地版
+					groundBox.setGroundBox($(this));
+					groundBox.setNowGroundBoxInfo(null);
+				},
+				over: function() {
+				}
+			});		
+		}	
+	}
+	
+	//取得方塊class
+	function getBoxClass() {
+		var boxCss = 'mouseIn';
+		if(selBox) {
+			boxCss = selBox['class'];
+		}
+		return boxCss;
+	}
+	
+    
+	
+	//方塊與地板物件
+	function GroundBox() {
+		var 
+			bRow, 
+			bColumn, 
+			$groundBox;
+		
+		//設定座標
+		this.setNowGroundBoxInfo = function($gb) {
+			if(!$gb) {
+				bRow = null;
+				bColumn = null;
+				$groundBox = null;
+				return;
+			}
+			$groundBox = $gb;
+			bRow = $groundBox.data('row');
+			bColumn = $groundBox.data('column');
+			
+		};
+		
+		//設定地板
+		this.setGroundBox = function($section) {				
+			SetGround($section);
+			checkGameOver();
+
+		};
+		
+		this.log = function() {
+			console.log(bRow + ', ' + bColumn);
+		};
+		
+		function checkGameOver() {
+			var sections = view.getAllSection();
+			
+			$.each(sections, function(idx, $section) {
+				console.log('$section.data(isEnble) -> ' + $section.data('isEnble') );
+				if($section.data('isEnble') == 0) {
+					return;
+				}
+			});
+			for(var row = 0; row < option.width; row++) {
+				for(var column = 0; column < option.height; column++) {
+				}
+			}
+			console.log(sections);
+		}
+		
+		function SetGround($section) {
+			if(!$groundBox) {
+				return;
+			}
+			var $sectionBox = $section.data('box'),
+				struts = $sectionBox['struts'],
+				selectionClass = $sectionBox['class']
+				startGroudObj = getGroudObj(),
+				secMaxColumn = struts.length,
+				secMaxRow = struts[0].length ? struts[0].length : 1,
+				source = 0;
+				
+			if(bRow + secMaxRow > 10 || bColumn + secMaxColumn > 10) {
+				return;
+			}
+			
+			//驗証地版方塊是否被設定過
+			for(var row = 0; row < secMaxRow; row++) {
+				for(var column = 0; column < secMaxColumn; column++) {
+					var boxRow = row + bRow,
+						boxColumn = column + bColumn;
+					if(struts[column][row] == 1
+						|| struts[column][row] == undefined) {
+						if( groundMap[boxRow + ',' + boxColumn].seled === 1) {
+							return;
+						}
+						
+					}
+				}
+			}	
+			
+			//記錄要刪除的row和column
+			
+			//設定地板
+			for(var row = 0; row < secMaxRow; row++) {
+				for(var column = 0; column < secMaxColumn; column++) {
+					var boxRow = row + bRow,
+						boxColumn = column + bColumn;
+					if(struts[column][row] == 1
+						|| struts[column][row] == undefined) {
+						var groud = groundMap[boxRow + ',' + boxColumn];
+						groud.SetBox(selectionClass);
+						source++;
+					}
+				}
+			}		
+			
+			//記錄要刪除整條的row
+			var clearGroudRow = [];
+			for(var row = 0; row < option.height; row++) {
+				var isAll = false;
+				for(var column = 0; column < option.width; column++) {
+					var groud = groundMap[row + ',' + column];
+					isAll = true;
+					if(groud['seled'] == 0) {
+						isAll = false;
+						break;
+					}
+				}
+				
+				if(isAll) {
+					clearGroudRow.push(row);
+				}			
+			}
+			
+			//記錄要刪除整條的column
+			var clearGroudColumn = [];
+			for(var column = 0; column < option.width; column++) {	
+				var isAll = false;
+				for(var row = 0; row < option.height; row++) {
+					var groud = groundMap[row + ',' + column];
+					isAll = true;
+					if(groud['seled'] == 0) {
+						isAll = false;
+						break;
+					}
+				}
+				if(isAll) {
+					clearGroudColumn.push(column);
+				}			
+			}
+			
+			console.log('clearGroudColumn-'+clearGroudColumn);
+			console.log('clearGroudRow-'+clearGroudRow);
+			
+			var adddSour = 0,
+				adddAllSour = 0;
+			//刪除row,column
+			$.each(clearGroudColumn, function(idx, column) {
+				for(var row = 0; row < option.height; row++) {
+					var groud = groundMap[row + ',' + column];
+					groud.remove();
+				}
+				adddSour++;
+				adddAllSour += adddSour*10;
+			});
+			$.each(clearGroudRow, function(idx, row) {
+				for(var column = 0; column < option.width; column++) {
+					var groud = groundMap[row + ',' + column];
+					groud.remove();
+				}
+				adddSour++;
+				adddAllSour += adddSour*10;
+			});
+			//刪除section
+			view.delSection($section);
+			view.addSource(source + adddAllSour);
+		
+		}
+		
+		
+		function getGroudObj() {
+			return groundMap[bRow + ',' + bColumn];
+		}
+	}
+
+	//view物件
+    function View() {
+      var 
+		$wrapper = $('<div>', {id:'wrapper'}),
+		$header = $('<div>', {id:'header'}),
+        $content = $('<div>', {id:'content'}),
+        $footer = $('<div>', {id:'footer'}),
+		nowSection = 0,
+		source = 0
+        ;
+		
+	
+	var $section1 = $('<div>', {id: 'section1', class: 'section'}),
+		$section2 = $('<div>', {id: 'section2', class: 'section'}),
+		$section3 = $('<div>', {id: 'section3', class: 'section'}),
+		$source = $('<div>', {id: 'section1', text: 'source: 0'});
+		
+      this.init = function() {
+        frame();
+      };
+      this.addSource = function(sourceAdd) {
+        source += sourceAdd;
+		$source.text('source: ' + source);
+      };
+      this.getAllSection = function() {
+        return [$section1, $section2, $section3];
+      };
+	  
+	  //刪除選擇物件
+      this.delSection = function($section) {
+		$section.empty();
+		$section.data('isEnble', 0);
+		console.log('$section.data(isEnble) -> ' + $section.data('isEnble') );
+		nowSection -= 1;
+		if(nowSection !== 0) {
+			return;
+		}
+		
+		//重新產生物件
+		setRandomSection($section1);
+		setRandomSection($section2);
+		setRandomSection($section3);
+		setSectionEvent();
+      };
+      
+      //畫frame
+      function frame() {
+        $wrapper.append($header, $content, $footer);
+        $this.append($wrapper);
+        drawHeader();
+        drawGound();
+        drawFooter();
+      }
+      
+      //畫Header
+      function drawHeader() {
+        $header.append($source);
+      }
+      
+      //畫方格地版
+      function drawGound() {
+        var $div = $('<div>', {id: 'ground'}),
+            $table = $('<table>', {border: 0, id: 'groundArea'});
+        for(var column = 0; column < option.width; column++) {
+          var $tr = $('<tr>');
+          for(var row = 0; row < option.height; row++) {
+			
+            setBgKind($tr, 'bg_defult', row, column);
+          }
+          $table.append($tr);
+        }
+        $div.append($table);
+        $content.append($div);
+      }
+	  
+	  //設定地版樣式
+	  function setBgKind($tr, kind, row, column) {
+		var $td = $('<td>', {class: kind})
+					.data('row',row)
+					.data('column',column)
+					;
+		groundMap[row + ',' + column] = {
+			gound:$td,
+			row:row,
+			column:column,
+			seled:0,//是否被設定了
+			//還原到最初的狀態
+			remove: function() {
+				this.gound.prop({
+					class:'bg_defult'
+				});
+				this.seled = 0;
+			},
+			//設定方塊格子的屬性
+			SetBox: function(boxClass) {
+				this.gound.addClass(boxClass);
+				this.seled = 1;
+			}
+		};
+		$tr.append($td);
+	  }
+      
+      //畫Footer
+      function drawFooter() {
+		
+		//產生可選擇的方塊
+        setRandomSection($section1);
+        setRandomSection($section2);
+        setRandomSection($section3);
+		
+        $footer.append($section1,$section2,$section3);
+      }
+      
+	  //亂數產生可選擇的方塊
+	  function setRandomSection($section) {
+		nowSection += 1;
+		var boxIdx = Math.floor(Math.random()*boxs.length),
+			box = boxs[boxIdx],
+			$table = $('<table>'),
+			boxStruts = box['struts'],
+			boxClass = box['class'],
+			boxSource = box['source']
+			;
+		for(var row = 0; row < boxStruts.length; row++) {
+			var $tr = $('<tr>'),
+				columnSize = boxStruts[row].length;
+			if(columnSize) {
+				for(var col = 0; col < columnSize; col++) {
+					var $td = $('<td>');
+					if(boxStruts[row][col] == 1) {
+						$td.addClass(boxClass);
+					}
+					$tr.append($td);
+				}		
+			}
+			else {
+				var $td = $('<td>', {class: boxClass});
+				$tr.append($td);
+			}	
+			$table.append($tr);
+			$table.data('box', box);
+			
+		}
+		
+		$section.append($table);
+		$section.data('isEnble', 1);	
+	  }
+	  
+	var boxs = [
+		  {
+			struts: [1],
+			class: 'bg_blue2',
+			source: 1
+		  },
+		  {
+			struts: [[1,1],[1,1]],
+			class: 'bg_green',
+			source: 4
+		  },
+		  {
+			struts: [[0,1],[1,1]],
+			class: 'bg_green2',
+			source: 3
+		  },
+		  {
+			struts: [[1,0],[1,1]],
+			class: 'bg_green2',
+			source: 3
+		  },
+		  {
+			struts: [[1,1],[0,1]],
+			class: 'bg_green2',
+			source: 3
+		  },
+		  {
+			struts: [[1,1],[1,0]],
+			class: 'bg_green2',
+			source: 3
+		  },
+		  {
+			struts: [[1,1]],
+			class: 'bg_org',
+			source: 2
+		  },
+		  {
+			struts: [[1],[1]],
+			class: 'bg_org',
+			source: 2
+		  },
+		  {
+			struts: [[1,1,1]],
+			class: 'bg_red3',
+			source: 3
+		  },
+		  {
+			struts: [[1],[1],[1]],
+			class: 'bg_red3',
+			source: 3
+		  },
+		  {
+			struts: [[1,1,1,1]],
+			class: 'bg_red',
+			source: 4
+		  },
+		  {
+			struts: [[1],[1],[1],[1]],
+			class: 'bg_red2',
+			source: 4
+		  },
+		  {
+			struts: [[1,1,1,1,1]],
+			class: 'bg_red2',
+			source: 5
+		  },
+		  {
+			struts: [[1],[1],[1],[1],[1]],
+			class: 'bg_red',
+			source: 5
+		  },
+		  
+		  {
+			struts: [[1,0,0],[1,0,0],[1,1,1]],
+			class: 'bg_blue',
+			source: 7
+		  },
+		  {
+			struts: [[1,1,1],[1,0,0],[1,0,0]],
+			class: 'bg_blue',
+			source: 7
+		  },
+		  {
+			struts: [[0,0,1],[0,0,1],[1,1,1]],
+			class: 'bg_blue',
+			source: 7
+		  },
+		  {
+			struts: [[1,1,1],[0,0,1],[0,0,1]],
+			class: 'bg_blue',
+			source: 7
+		  },
+		  
+		  {
+			struts: [[1,1,1],[1,1,1],[1,1,1]],
+			class: 'bg_green',
+			source: 16
+		  }
+		  /*
+		  {
+			struts: [[1]],
+			class: 'bg_green',
+			source: 16
+		  },
+		  {
+			struts: [[1,0,1,0,1,0,1],[0,1,0,1,0,1,0],[1,0,1,0,1,0,1],[0,1,0,1,0,1,0],[1,0,1,0,1,0,1],[0,1,0,1,0,1,0],[1,0,1,0,1,0,1],[0,1,0,1,0,1,0]],
+			class: 'bg_green',
+			source: 16
+		  }*/
+		];
+    }
+    
+  };
+
+})(jQuery);
+
+$('#game1010').game1010();
+</script>
