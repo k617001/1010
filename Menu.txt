@@ -1,0 +1,41 @@
+﻿encog-core 作者寫的範例說明(ConsoleExamples範例)
+
+#資料夾	#中文說明	
+Adaline	簡單ADALINE辨別數字
+Analyst	這個例子顯示瞭如何從代碼中使用Encog分析器。
+Analyzer	分析範圍並預測它們。	使用3個策略的組合預測具有elmhan神經網絡的範圍。可以範圍randomtrainer [numberofInputs] [OutputSize]
+AnnealTSP	退火旅行推銷員	
+ARTExample	使用ART1神經網絡將輸入模式分組。 ART1網絡學習這些組，因為它被呈現給要分類的項目。
+BAM	雙向關聯記憶
+Bayesian	執行貝葉斯網絡的查詢來回答出租車問題
+Benchmark	Elliott可以比tan / sigmoid快得多，這個例子就是測量。
+Boltzmann	使用Boltzmann machine解決Traveling Salesman 問題
+CPN	(反傳播類神經網路)CPN神經網絡學習確定火箭在哪個角度行駛
+CSVPredict	市場預測	
+ElmanNetwork	時間序列(Temporal)
+EPL	遺傳編程。
+Forest	使用NormalizeData來預測森林覆蓋。
+ForexExample	使用CSV預測外匯匯率。使用簡單的經常性神經網絡（Elman）預測外匯對價格。
+Freeform	(自由網絡：Elman SRN)使用freeform創建一個Elman SRN網絡
+GeneticTSP	(遺傳算法旅行推銷員)使用遺傳算法為旅行推銷員問題（TSP）提供解決方案。
+Guide-sunspots	(時間序列回歸：預測太陽黑子)如何將EncogModel與太陽黑子數據集一起使用。
+Guide-auto-mpg	(預測汽車的MPG)如何將EncogModel與自動MPG數據集一起使用。
+Guide-iris	(虹膜數據集)如何使用EncogModel與Iris數據集。
+Hopfield-Associates	霍普菲爾德模式
+Hopfield-Simple	教導Hopfield神經網絡來識別一些非常簡單的模式
+Image	簡單的ADALINE神經網絡識別數位檔案(圖片)
+Indicator-Avg	提供一個建立在兩個SMA上的NinjaTrader示例指示器。
+Indicator-CustomInd	EMA指標。
+Indicator-ImportData	(indicator-download)Ninjatrader
+JordanNetwork	(Jordan Temporal XOR)使用由XOR真值表構成的時間序列作為預測的基礎。 比較約旦與傳統的前饋。
+LiveSimul	(livesimul-一個在現實情況下刺激神經元活動的簡單例子，並展示瞭如何在2個命令中處理數據和計算到網絡中)使用前饋神經網絡預測隨機數據並進行歸一化。
+Lunar	(著陸器)這個例子使用遺傳算法將太空飛船登上月球。 沒有提供培訓資料，但採用監督培訓的土地。
+Market	(簡單的市場預測)使用EOD數據來預測股票的方向。
+MultiRadial	(BRF)Use a RBF network to learn the XOR operator.
+NetWorkPruner	(Prunes network)這個例子將修剪網絡。 您必須通過網絡的培訓文件，並將開始修剪過程
+Normalize	(規範檔案)請參閱如何使用Encog Analyst來歸一化文件
+Predict	(預測太陽黑子)使用前饋神經網絡來預測太陽黑子。
+RateSP500	讀取CSV並預測標準普爾500指數。
+SVM	如何使用SVM執行簡單回歸。
+SVM Predict	隨機使一個小的SVM隨機訓練。
+XOR	基本XOR
