@@ -1,0 +1,142 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using BallotAiying2;
+using System.Drawing;
+using CommonUtil;
+using System.Drawing.Imaging;
+using CommonUtil.Helper.BallotAiying2;
+using System.Diagnostics;
+
+namespace ConsoleTest.BallotAiyingTest
+{
+    public class BaTest2
+    {
+        int gValue = 0;
+        public void Action()
+        {
+            Bitmap bmpobj = new Bitmap(@"D:\555.png");
+
+            for (int i = 0; i <= 255; i++ )
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Reset();
+                sw = Stopwatch.StartNew();
+                Console.WriteLine("Start-> " + i);
+
+                gValue = i;
+                //sobel
+                Bitmap sobel = this.Gv2Sobel(bmpobj);
+
+                //bmpobj.Save(@"D:\JPG_Test\" + i.ToString().PadLeft(2, '0') + ".jpg", ImageFormat.Png);
+
+                sw.Stop();
+                double s = (double)sw.ElapsedMilliseconds / 1000;
+                Console.WriteLine("花費 {0} 秒", s);
+            }
+
+        }
+        
+        /// <summary>
+        /// sobel
+        /// </summary>
+        /// <param name="bmpobj"></param>
+        /// <param name="runFun"></param>
+        /// <returns></returns>
+        private Bitmap Gv2Sobel(Bitmap bmpobj)
+        {
+            ImageHelper image = new ImageHelper();
+            int[, ,] rgbData = image.GetRGBData(bmpobj);
+
+            int Width = rgbData.GetLength(0);
+            int Height = rgbData.GetLength(1); // 
+
+            int[, ,] rgbData2 = (int[, ,])rgbData.Clone();
+            
+            GrayValue2(rgbData2);
+            Sobel(rgbData2);
+
+            return image.SetRGBData(rgbData2);
+        }
+
+        
+        /// <summary>
+        /// 灰階二值化合併
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="rgbData"></param>
+        private void GrayValue2(int[, ,] rgbData)
+        {
+            int Width = rgbData.GetLength(0);
+            int Height = rgbData.GetLength(1);
+
+
+            //灰階化與二值化
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    int r = rgbData[x, y, 0]; // Red Channel 保留不動 
+                    int g = rgbData[x, y, 1] = 0; // Green Channel 改成 0 
+                    int b = rgbData[x, y, 2] = 0; // Blue Channel 改成 0 
+
+                    int value = (int)Math.Round((double)(r + g + b / 3), 0);
+                    if (value < gValue)
+                    {
+                        rgbData[x, y, 0] = 0;
+                        rgbData[x, y, 1] = 0;
+                        rgbData[x, y, 2] = 0;
+                    }
+                    else
+                    {
+                        rgbData[x, y, 0] = 255;
+                        rgbData[x, y, 1] = 255;
+                        rgbData[x, y, 2] = 255;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// sobel
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="rgbData"></param>
+        private void Sobel(int[, ,] rgbData)
+        {
+            int Width = rgbData.GetLength(0);
+            int Height = rgbData.GetLength(1); 
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (x >= 1 && x < Width - 1 && y >= 1 && y < Height - 1)
+                    {
+                        int x0 = rgbData[x - 1, y, 0];
+                        int x1 = rgbData[x, y, 0];
+                        int x2 = rgbData[x + 1, y, 0];
+
+                        int y0 = rgbData[x, y - 1, 0];
+                        int y1 = rgbData[x, y, 0];
+                        int y2 = rgbData[x, y + 1, 0];
+
+                        if (x0 == 0 && x1 == 0 && x2 == 0
+                            && y0 == 0 && y1 == 0 && y2 == 0)
+                        {
+                            rgbData[x, y, 0] = 255;
+                            rgbData[x, y, 1] = 255;
+                            rgbData[x, y, 2] = 255;
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+    }
+}
