@@ -14,9 +14,30 @@ namespace ConsoleTest.BallotAiyingTest
     public class BaTest2
     {
         int gValue = 0;
+
+
         public void Action()
         {
-            Bitmap bmpobj = new Bitmap(@"D:\555.png");
+            Bitmap bmpobj = new Bitmap(@"D:\333.png");
+
+            Stopwatch sw = new Stopwatch();
+            sw.Reset();
+            sw = Stopwatch.StartNew();
+
+            gValue = 128;
+            //sobel
+            Bitmap sobel = this.Gv2Sobel(bmpobj);
+
+            sobel.Save(@"D:\128.png", ImageFormat.Png);
+
+            sw.Stop();
+            double s = (double)sw.ElapsedMilliseconds / 1000;
+            Console.WriteLine("花費 {0} 秒", s);
+        }
+
+        public void Action2()
+        {
+            Bitmap bmpobj = new Bitmap(@"D:\333.png");
 
             for (int i = 0; i <= 255; i++ )
             {
@@ -29,7 +50,7 @@ namespace ConsoleTest.BallotAiyingTest
                 //sobel
                 Bitmap sobel = this.Gv2Sobel(bmpobj);
 
-                //bmpobj.Save(@"D:\JPG_Test\" + i.ToString().PadLeft(2, '0') + ".jpg", ImageFormat.Png);
+                sobel.Save(@"D:\JPG_Test\" + i.ToString().PadLeft(2, '0') + ".jpg", ImageFormat.Png);
 
                 sw.Stop();
                 double s = (double)sw.ElapsedMilliseconds / 1000;
@@ -55,9 +76,9 @@ namespace ConsoleTest.BallotAiyingTest
             int[, ,] rgbData2 = (int[, ,])rgbData.Clone();
             
             GrayValue2(rgbData2);
-            Sobel(rgbData2);
+            int[, ,] rgbData3 = Sobel(rgbData2);
 
-            return image.SetRGBData(rgbData2);
+            return image.SetRGBData(rgbData3);
         }
 
         
@@ -105,10 +126,12 @@ namespace ConsoleTest.BallotAiyingTest
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="rgbData"></param>
-        private void Sobel(int[, ,] rgbData)
+        private int[, ,] Sobel(int[, ,] rgbData)
         {
             int Width = rgbData.GetLength(0);
-            int Height = rgbData.GetLength(1); 
+            int Height = rgbData.GetLength(1);
+
+            int[, ,] rgbDataTmp = new int[Width, Height, 3];
 
             for (int y = 0; y < Height; y++)
             {
@@ -121,21 +144,26 @@ namespace ConsoleTest.BallotAiyingTest
                         int x2 = rgbData[x + 1, y, 0];
 
                         int y0 = rgbData[x, y - 1, 0];
-                        int y1 = rgbData[x, y, 0];
                         int y2 = rgbData[x, y + 1, 0];
 
                         if (x0 == 0 && x1 == 0 && x2 == 0
-                            && y0 == 0 && y1 == 0 && y2 == 0)
+                            && y0 == 0  && y2 == 0)
                         {
-                            rgbData[x, y, 0] = 255;
-                            rgbData[x, y, 1] = 255;
-                            rgbData[x, y, 2] = 255;
+                            rgbDataTmp[x, y, 0] = 255;
+                            rgbDataTmp[x, y, 1] = 255;
+                            rgbDataTmp[x, y, 2] = 255;
+                        }
+                        else
+                        {
+                            rgbDataTmp[x, y, 0] = rgbData[x, y, 0];
+                            rgbDataTmp[x, y, 1] = rgbData[x, y, 1];
+                            rgbDataTmp[x, y, 2] = rgbData[x, y, 2];
                         }
                     }
                 }
             }
 
-
+            return rgbDataTmp;
         }
 
     }
